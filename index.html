@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Anniversary - Ahmad Alimsyah & Dhita</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,500;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        .font-script { font-family: 'Dancing Script', cursive; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        body { font-family: 'Inter', sans-serif; background-color: #FAF6F0; color: #4A403A; overflow-x: hidden; }
+
+        /* Animasi Kelopak Bunga Putih Jatuh */
+        @keyframes fall {
+            0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0; }
+            15% { opacity: 0.9; }
+            85% { opacity: 0.9; }
+            100% { transform: translateY(110vh) translateX(60px) rotate(360deg); opacity: 0; }
+        }
+        .petal {
+            position: fixed;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 150% 0 150% 0;
+            pointer-events: none;
+            z-index: 50;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            animation: fall linear infinite;
+        }
+
+        /* Efek Kertas Surat */
+        .letter-shadow {
+            box-shadow: 0 20px 40px -15px rgba(181, 137, 104, 0.2);
+        }
+
+        /* Interaksi Animasi Amplop Gerbang */
+        .envelope-wrapper {
+            perspective: 1000px;
+        }
+        .envelope-flap {
+            transform-origin: top;
+            transition: transform 0.6s ease-in-out, z-index 0.6s ease-in-out;
+        }
+        .envelope-wrapper.open .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+        .envelope-card {
+            transition: transform 0.8s ease-in-out 0.4s, opacity 0.6s ease-in-out 0.4s;
+        }
+        .envelope-wrapper.open .envelope-card {
+            transform: translateY(-80px);
+        }
+    </style>
+</head>
+<body class="bg-[#FAF6F0] text-[#4A403A] selection:bg-[#E3D5CA] selection:text-[#4A403A]">
+
+    <!-- Audio Element: Nadhif Basalamah - Penjaga Hati -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="https://files.catbox.moe/u1z1w1.mp3" type="audio/mpeg">
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-acoustic-guitar-112260.mp3" type="audio/mpeg">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
+
+    <!-- Floating Audio Control Button (Tampil setelah gate terbuka) -->
+    <button id="music-control" onclick="toggleMusic()" class="fixed bottom-6 right-6 z-50 w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-lg border border-[#E3D5CA] flex items-center justify-center text-[#B08968] hover:scale-110 transition duration-300 opacity-0 pointer-events-none" title="Putar/Hentikan Musik">
+        <span id="music-icon" class="text-xl">🎵</span>
+    </button>
+
+    <!-- Container Kelopak Bunga (Generated via JS) -->
+    <div id="flower-container" class="fixed inset-0 pointer-events-none overflow-hidden z-50"></div>
+
+    <!-- 0. SCREEN PEMBUKA ENVELOPE GATE (MODAL AWAL) -->
+    <div id="envelope-gate" class="fixed inset-0 z-40 bg-[#FAF6F0] flex flex-col items-center justify-center p-4 transition-opacity duration-700">
+        <div class="text-center mb-8">
+            <span class="text-xs uppercase tracking-widest text-[#B08968] font-semibold">Ada Pesan Spesial</span>
+            <h1 class="font-serif text-2xl sm:text-3xl font-bold text-[#4A403A] mt-1">Happy Anniversary</h1>
+            <p class="text-sm text-[#786A5D] mt-1">Ketuk amplop di bawah ini untuk membukanya</p>
+        </div>
+
+        <!-- Amplop Interaktif -->
+        <div id="main-envelope" class="envelope-wrapper relative w-72 sm:w-80 h-48 cursor-pointer group" onclick="openGateEnvelope()">
+            <!-- Amplop Belakang -->
+            <div class="absolute inset-0 bg-[#E3D5CA] rounded-xl shadow-xl"></div>
+            
+            <!-- Kartu di dalam Amplop -->
+            <div class="envelope-card absolute inset-x-3 top-3 bottom-3 bg-white rounded-lg shadow-sm p-4 flex flex-col items-center justify-center text-center z-10">
+                <span class="text-2xl mb-1">🤍</span>
+                <p class="font-serif font-bold text-sm text-[#4A403A]">Ahmad Alimsyah & Dhita</p>
+                <p class="font-script text-lg text-[#B08968]">12 November 2023</p>
+            </div>
+
+            <!-- Lipatan Bawah & Samping Amplop -->
+            <div class="absolute inset-0 bg-gradient-to-t from-[#D5BDAF] to-[#E3D5CA] rounded-xl z-20 [clip-path:polygon(0_0,_50%_45%,_100%_0,_100%_100%,_0_100%)] shadow-md"></div>
+
+            <!-- Lipatan Atas Amplop (Flap) -->
+            <div class="envelope-flap absolute inset-x-0 top-0 h-28 bg-[#D5BDAF] rounded-t-xl z-30 [clip-path:polygon(0_0,_100%_0,_50%_100%)] shadow-sm"></div>
+
+            <!-- Segel Lilin / Stiker -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-12 h-12 bg-[#B08968] text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white group-hover:scale-110 transition duration-300">
+                <span class="font-serif italic font-bold text-sm">A&D</span>
+            </div>
+        </div>
+
+        <p class="text-xs text-[#8C7A6B] mt-8 animate-pulse">Klik amplop untuk membuka 💌</p>
+    </div>
+
+    <!-- HALAMAN UTAMA WEBSITE -->
+    <div id="main-content" class="opacity-0 transition-opacity duration-1000">
+
+        <!-- 1. LANDING SCREEN -->
+        <header class="relative min-h-screen flex flex-col items-center justify-center text-center px-4 bg-gradient-to-b from-[#F5EBE6] via-[#FAF6F0] to-[#FAF6F0]">
+            <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#D5BDAF_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none"></div>
+            
+            <div class="z-10 max-w-3xl mx-auto space-y-6">
+                <!-- Badge -->
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 border border-[#E3D5CA] shadow-sm backdrop-blur-sm animate-pulse">
+                    <span class="text-rose-500">🤍</span>
+                    <span class="text-xs uppercase tracking-widest font-semibold text-[#8C7A6B]">Our Special Milestone</span>
+                </div>
+
+                <!-- Title -->
+                <h1 class="font-serif text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-[#4A403A] leading-tight">
+                    Happy Anniversary <br>
+                    <span class="font-script text-5xl sm:text-7xl md:text-8xl text-[#B08968] font-normal block mt-2">
+                        "Ahmad Alimsyah & Dhita"
+                    </span>
+                </h1>
+
+                <p class="text-base sm:text-lg text-[#786A5D] max-w-xl mx-auto font-light leading-relaxed">
+                    Setiap detik bersama adalah babak terindah dalam kisah kita. Terima kasih telah menjadi rumah bagiku.
+                </p>
+
+                <!-- Scroll Down Button -->
+                <div class="pt-8">
+                    <a href="#counter" class="inline-flex flex-col items-center text-sm text-[#8C7A6B] hover:text-[#4A403A] transition duration-300">
+                        <span class="mb-2 tracking-wide font-medium">Jelajahi Kisah Kita</span>
+                        <svg class="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- 2. LIVE COUNTER SECTION -->
+        <section id="counter" class="py-20 px-4 max-w-5xl mx-auto">
+            <div class="bg-white/80 backdrop-blur-md rounded-3xl p-8 sm:p-12 border border-[#E3D5CA] letter-shadow text-center relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-[#F5EBE6] rounded-full blur-2xl pointer-events-none"></div>
+                
+                <h2 class="font-serif text-2xl sm:text-3xl font-semibold mb-3 text-[#4A403A]">
+                    Perjalanan Cinta Kita Sejak 12 November 2023
+                </h2>
+                <p class="text-sm sm:text-base text-[#8C7A6B] mb-10">Waktu terus berjalan, namun rasa sayang ini tetap abadi.</p>
+
+                <!-- Counter Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+                    <div class="bg-[#FAF6F0] p-6 rounded-2xl border border-[#E3D5CA]/60 flex flex-col items-center justify-center transition hover:-translate-y-1 duration-300">
+                        <span id="years" class="font-serif text-3xl sm:text-5xl font-bold text-[#B08968]">0</span>
+                        <span class="text-xs sm:text-sm uppercase tracking-wider text-[#786A5D] mt-2 font-medium">Tahun</span>
+                    </div>
+                    <div class="bg-[#FAF6F0] p-6 rounded-2xl border border-[#E3D5CA]/60 flex flex-col items-center justify-center transition hover:-translate-y-1 duration-300">
+                        <span id="months" class="font-serif text-3xl sm:text-5xl font-bold text-[#B08968]">0</span>
+                        <span class="text-xs sm:text-sm uppercase tracking-wider text-[#786A5D] mt-2 font-medium">Bulan</span>
+                    </div>
+                    <div class="bg-[#FAF6F0] p-6 rounded-2xl border border-[#E3D5CA]/60 flex flex-col items-center justify-center transition hover:-translate-y-1 duration-300">
+                        <span id="days" class="font-serif text-3xl sm:text-5xl font-bold text-[#B08968]">0</span>
+                        <span class="text-xs sm:text-sm uppercase tracking-wider text-[#786A5D] mt-2 font-medium">Hari</span>
+                    </div>
+                    <div class="bg-[#FAF6F0] p-6 rounded-2xl border border-[#E3D5CA]/60 flex flex-col items-center justify-center transition hover:-translate-y-1 duration-300">
+                        <span id="hours" class="font-serif text-3xl sm:text-5xl font-bold text-[#B08968]">0</span>
+                        <span class="text-xs sm:text-sm uppercase tracking-wider text-[#786A5D] mt-2 font-medium">Jam</span>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-center items-center gap-2 text-xs sm:text-sm text-[#8C7A6B]">
+                    <span id="seconds-counter">Dan terus bertambah setiap detik...</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. GALERI FOTO ESTETIS (POLAROID) -->
+        <section class="py-20 px-4 max-w-6xl mx-auto">
+            <div class="text-center max-w-xl mx-auto mb-16">
+                <span class="text-xs uppercase tracking-widest text-[#B08968] font-semibold">Sweet Memories</span>
+                <h2 class="font-serif text-3xl sm:text-4xl font-bold mt-2">Galeri Kenangan Kita</h2>
+                <p class="text-[#786A5D] text-sm sm:text-base mt-2">Setiap potret menyimpan cerita tawa, canda, dan cinta.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+                <!-- Polaroid 1 -->
+                <div class="bg-white p-4 pb-6 rounded-lg shadow-md border border-[#E3D5CA] transform hover:-rotate-1 hover:scale-105 transition duration-300">
+                    <div class="overflow-hidden aspect-[4/5] rounded bg-[#F5EBE6]">
+                        <img src="https://placehold.co/400x500/f5ebe6/b08968?text=Our+Wedding+Moment" 
+                             onerror="this.src='https://placehold.co/400x500/f5ebe6/b08968?text=Memory+1'" 
+                             alt="Kenangan 1" 
+                             class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-script text-2xl text-center text-[#615347] mt-4">Momen Pernikahan kita ✨</p>
+                </div>
+
+                <!-- Polaroid 2 -->
+                <div class="bg-white p-4 pb-6 rounded-lg shadow-md border border-[#E3D5CA] transform hover:rotate-1 hover:scale-105 transition duration-300">
+                    <div class="overflow-hidden aspect-[4/5] rounded bg-[#F5EBE6]">
+                        <img src="https://placehold.co/400x500/f5ebe6/b08968?text=Sweet+Moments" 
+                             onerror="this.src='https://placehold.co/400x500/f5ebe6/b08968?text=Memory+2'" 
+                             alt="Kenangan 2" 
+                             class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-script text-2xl text-center text-[#615347] mt-4">Tawa & Bahagia Bersama 🤍</p>
+                </div>
+
+                <!-- Polaroid 3 -->
+                <div class="bg-white p-4 pb-6 rounded-lg shadow-md border border-[#E3D5CA] transform hover:-rotate-1 hover:scale-105 transition duration-300 sm:col-span-2 md:col-span-1 max-w-sm mx-auto sm:max-w-none w-full">
+                    <div class="overflow-hidden aspect-[4/5] rounded bg-[#F5EBE6]">
+                        <img src="https://placehold.co/400x500/f5ebe6/b08968?text=Forever+Us" 
+                             onerror="this.src='https://placehold.co/400x500/f5ebe6/b08968?text=Memory+3'" 
+                             alt="Kenangan 3" 
+                             class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-script text-2xl text-center text-[#615347] mt-4">Menuju Masa Depan 🌸</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. KOTAK SURAT / PESAN CINTA ROMANTIS -->
+        <section class="py-20 px-4 max-w-3xl mx-auto">
+            <div class="text-center mb-10">
+                <span class="text-xs uppercase tracking-widest text-[#B08968] font-semibold">Heart to Heart</span>
+                <h2 class="font-serif text-3xl sm:text-4xl font-bold mt-2">Kotak Pesan Cinta</h2>
+                <p class="text-[#786A5D] text-sm mt-1">Klik amplop di bawah ini untuk membaca surat spesial untukmu.</p>
+            </div>
+
+            <!-- Envelope Wrapper -->
+            <div class="bg-white rounded-3xl p-6 sm:p-10 border border-[#E3D5CA] letter-shadow relative">
+                <div id="envelope-view" class="text-center py-10 cursor-pointer group" onclick="openLetter()">
+                    <div class="w-24 h-24 mx-auto bg-[#F5EBE6] rounded-full flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition duration-300 shadow-inner">
+                        💌
+                    </div>
+                    <h3 class="font-serif text-xl font-semibold text-[#4A403A]">Buka Surat Cinta</h3>
+                    <p class="text-sm text-[#8C7A6B] mt-1">Ketuk untuk membuka pesan rahasia...</p>
+                </div>
+
+                <!-- Hidden Letter Content -->
+                <div id="letter-content" class="hidden space-y-6 animate-fadeIn">
+                    <div class="border-b border-[#E3D5CA] pb-4 flex justify-between items-center">
+                        <span class="font-serif italic text-sm text-[#8C7A6B]">Untuk Dhita tercinta,</span>
+                        <button onclick="closeLetter()" class="text-xs px-3 py-1 bg-[#FAF6F0] rounded-full border border-[#E3D5CA] hover:bg-[#E3D5CA]/30 transition">Tutup Surat</button>
+                    </div>
+                    <div class="font-serif text-base sm:text-lg leading-relaxed text-[#5C4F44] space-y-4">
+                        <p>
+                            "Hai Sayangku Dhita, tidak terasa sudah sekian lama kita melangkah bersama sejak 12 November 2023. Terima kasih sudah selalu sabar, menemani dalam suka maupun duka, dan memberikan warna terindah di setiap hariku."
+                        </p>
+                        <p>
+                            "Ahmad Alimsyah sangat bersyukur bisa memilikimu. Semoga kita terus bisa tumbuh bersama, saling menguatkan, dan mewujudkan semua impian kita di masa depan. I love you so much, now and forever."
+                        </p>
+                    </div>
+                    <div class="pt-6 border-t border-[#E3D5CA] flex justify-between items-center">
+                        <span class="font-script text-2xl text-[#B08968]">Ahmad Alimsyah</span>
+                        <span class="text-xs text-[#8C7A6B]">12 November & Selamanya</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="py-10 text-center border-t border-[#E3D5CA]/50 text-xs text-[#8C7A6B]">
+            <p>Made with 🤍 for Ahmad Alimsyah & Dhita — Happy Anniversary!</p>
+        </footer>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Audio Logic
+        const bgMusic = document.getElementById('bg-music');
+        const musicControl = document.getElementById('music-control');
+        const musicIcon = document.getElementById('music-icon');
+        let isPlaying = false;
+
+        function toggleMusic() {
+            if (isPlaying) {
+                bgMusic.pause();
+                musicIcon.innerText = '🔇';
+                isPlaying = false;
+            } else {
+                bgMusic.play().then(() => {
+                    musicIcon.innerText = '🎵';
+                    isPlaying = true;
+                }).catch(e => console.log("Audio play error:", e));
+            }
+        }
+
+        // 0. Script Membuka Gate Envelope Pembuka
+        function openGateEnvelope() {
+            const envelope = document.getElementById('main-envelope');
+            const gate = document.getElementById('envelope-gate');
+            const content = document.getElementById('main-content');
+
+            // Buka tutup amplop
+            envelope.classList.add('open');
+
+            // Putar musik saat amplop dibuka
+            bgMusic.play().then(() => {
+                isPlaying = true;
+                musicIcon.innerText = '🎵';
+            }).catch(() => {
+                isPlaying = false;
+                musicIcon.innerText = '🔇';
+            });
+
+            // Setelah animasi amplop selesai, sembunyikan gate dan tampilkan website utama
+            setTimeout(() => {
+                gate.classList.add('opacity-0');
+                setTimeout(() => {
+                    gate.classList.add('hidden');
+                    content.classList.remove('opacity-0');
+                    
+                    // Tampilkan tombol kontrol audio melayang
+                    musicControl.classList.remove('opacity-0', 'pointer-events-none');
+                }, 700);
+            }, 1200);
+        }
+
+        // 1. Script untuk membuat kelopak bunga putih melayang
+        const flowerContainer = document.getElementById('flower-container');
+        const petalCount = 15;
+
+        for (let i = 0; i < petalCount; i++) {
+            const petal = document.createElement('div');
+            petal.classList.add('petal');
+            
+            // Random styling untuk kelopak bunga
+            const size = Math.random() * 10 + 10; // 10px - 20px
+            petal.style.width = `${size}px`;
+            petal.style.height = `${size * 1.4}px`;
+            petal.style.left = `${Math.random() * 100}vw`;
+            
+            const duration = Math.random() * 8 + 6; // 6s - 14s
+            const delay = Math.random() * 5;
+            petal.style.animationDuration = `${duration}s`;
+            petal.style.animationDelay = `${delay}s`;
+            
+            flowerContainer.appendChild(petal);
+        }
+
+        // 2. Live Counter sejak 12 November 2023
+        const startDate = new Date('2023-11-12T00:00:00');
+
+        function updateCounter() {
+            const now = new Date();
+            
+            let years = now.getFullYear() - startDate.getFullYear();
+            let months = now.getMonth() - startDate.getMonth();
+            let days = now.getDate() - startDate.getDate();
+            let hours = now.getHours() - startDate.getHours();
+
+            if (hours < 0) {
+                hours += 24;
+                days -= 1;
+            }
+            if (days < 0) {
+                months -= 1;
+                // Ambil hari dari bulan sebelumnya
+                const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+                days += prevMonth.getDate();
+            }
+            if (months < 0) {
+                years -= 1;
+                months += 12;
+            }
+
+            document.getElementById('years').innerText = years;
+            document.getElementById('months').innerText = months;
+            document.getElementById('days').innerText = days;
+            document.getElementById('hours').innerText = hours;
+        }
+
+        setInterval(updateCounter, 1000);
+        updateCounter();
+
+        // 3. Interaksi Buka/Tutup Surat
+        const envelopeView = document.getElementById('envelope-view');
+        const letterContent = document.getElementById('letter-content');
+
+        function openLetter() {
+            envelopeView.classList.add('hidden');
+            letterContent.classList.remove('hidden');
+        }
+
+        function closeLetter() {
+            letterContent.classList.add('hidden');
+            envelopeView.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
